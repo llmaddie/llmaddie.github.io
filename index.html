@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maddie - Low Level Dev</title>
+    <style>
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #111111;
+            --bg-tertiary: #1a1a1a;
+            --text-primary: #e5e5e5;
+            --text-secondary: #a0a0a0;
+            --text-tertiary: #707070;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --border: #2a2a2a;
+            --code-bg: #161616;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            font-size: 15px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 60px 24px;
+        }
+
+        header {
+            margin-bottom: 80px;
+        }
+
+        .header-content h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
+        }
+
+        .header-content p {
+            color: var(--text-secondary);
+            font-size: 16px;
+            margin-bottom: 24px;
+        }
+
+        nav {
+            display: flex;
+            gap: 32px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        nav button {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 15px;
+            cursor: pointer;
+            padding: 0;
+            transition: color 0.2s;
+            font-family: inherit;
+        }
+
+        nav button:hover {
+            color: var(--text-primary);
+        }
+
+        nav button.active {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .view {
+            display: none;
+        }
+
+        .view.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .article-list, .project-list {
+            display: flex;
+            flex-direction: column;
+            gap: 48px;
+        }
+
+        .article-item, .project-item {
+            padding-bottom: 48px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .article-item:last-child, .project-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .item-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            font-size: 14px;
+            color: var(--text-tertiary);
+        }
+
+        .item-date {
+            display: flex;
+            align-items: center;
+        }
+
+        .item-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: color 0.2s;
+            letter-spacing: -0.01em;
+        }
+
+        .item-title:hover {
+            color: var(--accent);
+        }
+
+        .item-description {
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            line-height: 1.7;
+        }
+
+        .tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .article-full {
+            max-width: 680px;
+        }
+
+        .article-header {
+            margin-bottom: 48px;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 32px;
+            transition: color 0.2s;
+        }
+
+        .back-button:hover {
+            color: var(--text-primary);
+        }
+
+        .article-full h1 {
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
+            line-height: 1.3;
+        }
+
+        .article-content {
+            color: var(--text-primary);
+            line-height: 1.8;
+        }
+
+        .article-content h2 {
+            font-size: 24px;
+            font-weight: 600;
+            margin: 48px 0 20px;
+            letter-spacing: -0.01em;
+        }
+
+        .article-content h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 32px 0 16px;
+        }
+
+        .article-content p {
+            margin-bottom: 20px;
+        }
+
+        .article-content code {
+            background: var(--code-bg);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        .article-content pre {
+            background: var(--code-bg);
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 24px 0;
+            border: 1px solid var(--border);
+        }
+
+        .article-content pre code {
+            background: none;
+            padding: 0;
+        }
+
+        .article-content ul, .article-content ol {
+            margin: 20px 0 20px 24px;
+        }
+
+        .article-content li {
+            margin-bottom: 8px;
+        }
+
+        .create-article {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 32px;
+        }
+
+        .create-article h2 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 15px;
+            background: var(--bg-primary);
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .form-group textarea {
+            min-height: 300px;
+            resize: vertical;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .project-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            transition: border-color 0.2s, transform 0.2s;
+            cursor: pointer;
+        }
+
+        .project-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .project-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+
+        .project-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .project-stats {
+            display: flex;
+            gap: 12px;
+            font-size: 13px;
+            color: var(--text-tertiary);
+        }
+
+        .project-description {
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+
+        .project-lang {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .lang-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 40px 20px;
+            }
+
+            nav {
+                gap: 24px;
+            }
+
+            .article-full h1 {
+                font-size: 28px;
+            }
+
+            .projects-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <h1>Maddie</h1>
+                <p>Low-level development, reverse engineering, and compilation. I build compilers and explore system security.</p>
+            </div>
+            <nav>
+                <button onclick="showView('articles')" class="active">Articles</button>
+                <button onclick="showView('projects')">Projects</button>
+                <button onclick="showView('about')">About</button>
+            </nav>
+        </header>
+
+        <main>
+            <!-- Articles List -->
+            <div id="articles-view" class="view active">
+                <div class="article-list" id="article-list">
+                    <!-- Articles will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Article Full View -->
+            <div id="article-view" class="view">
+                <div class="article-full" id="article-full">
+                    <!-- Article content will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Create Article -->
+            <div id="create-view" class="view">
+                <div class="create-article">
+                    <h2>New article</h2>
+                    <form id="article-form">
+                        <div class="form-group">
+                            <label>Title</label>
+                            <input type="text" id="article-title" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Short description</label>
+                            <input type="text" id="article-description" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Tags (comma separated)</label>
+                            <input type="text" id="article-tags" placeholder="C, Compiler, Assembly">
+                        </div>
+                        <div class="form-group">
+                            <label>Content (Markdown supported)</label>
+                            <textarea id="article-content" required></textarea>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Publish</button>
+                            <button type="button" class="btn btn-secondary" onclick="showView('articles')">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Projects View -->
+            <div id="projects-view" class="view">
+                <div class="projects-grid" id="projects-grid">
+                    <!-- Projects will be loaded here -->
+                </div>
+            </div>
+
+            <!-- About View -->
+            <div id="about-view" class="view">
+                <div class="article-content">
+                    <h2>About</h2>
+                    <p>Hey, I'm Maddie. I'm 16 and passionate about low-level development, compilation, and system security.</p>
+                    
+                    <h3>What I do</h3>
+                    <p>Currently working on several projects:</p>
+                    <ul>
+                        <li>Building a C/C++ compiler from scratch</li>
+                        <li>Research on hardware security (Intel backdoors)</li>
+                        <li>System and kernel exploitation</li>
+                        <li>Binary reverse engineering</li>
+                    </ul>
+
+                    <h3>Tech stack</h3>
+                    <p>I mainly code in C, C++, and Rust, with a focus on x86-64 assembly (NASM). I'm particularly interested in compiler architecture, low-level mechanisms, and binary exploitation.</p>
+
+                    <h3>Contact</h3>
+                    <p>You can find me on <a href="https://github.com/llmaddie" style="color: var(--accent);">GitHub</a> or contact me via email at <a href="mailto:contactmaddi3@gmail.com" style="color: var(--accent);">contactmaddi3@gmail.com</a>.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Data storage
+        const articles = [
+            {
+                id: 1,
+                title: "Building an ELF disassembler for x64",
+                description: "Development of a disassembly tool to analyze 64-bit ELF files. Section parsing, symbol resolution, and readable assembly generation.",
+                date: "2025-10-28",
+                tags: ["C", "ELF", "x86-64", "Binary Analysis"],
+                content: `
+# Building an ELF disassembler for x64
+
+As part of my KittyDisassemblerC project, I developed a basic disassembler for 64-bit ELF files. The goal was to deeply understand the ELF format and x86-64 instructions.
+
+## Disassembler architecture
+
+The disassembler is divided into several modules:
+
+\`\`\`c
+// Parse ELF header
+ElfHeader parse_elf_header(FILE* file) {
+    ElfHeader header;
+    fread(&header, sizeof(ElfHeader), 1, file);
+    return header;
+}
+\`\`\`
+
+### Section parsing
+
+The first step is to parse the ELF header and identify different sections (.text, .data, .rodata, etc.). For each section, we extract:
+
+- Offset in the file
+- Section size
+- Permissions (R/W/X)
+- Virtual loading address
+
+## Instruction disassembly
+
+For disassembly, I implemented an x86-64 instruction decoder that:
+
+1. Reads opcodes byte by byte
+2. Determines instruction length
+3. Decodes operands (registers, immediates, memory addresses)
+4. Generates textual representation
+
+The most complex part was handling REX prefixes and ModR/M addressing modes.
+
+## Symbol resolution
+
+The symbol table allows displaying function names instead of raw addresses. I implemented a simple lookup in the .symtab section to resolve addresses to symbolic names.
+
+## Limitations and improvements
+
+The current disassembler is quite basic. Planned improvements include:
+
+- Full support for all x86-64 opcodes
+- Control flow analysis
+- Pattern detection (function prologue/epilogue)
+- JSON export for analysis
+
+This project helped me better understand how tools like objdump work internally.
+`
+            },
+            {
+                id: 2,
+                title: "Analysis of Intel cryptographic backdoors",
+                description: "Investigation of potential backdoors in Intel's AES-NI and RDRAND instructions. Microcode analysis and cryptographic primitives.",
+                date: "2025-10-15",
+                tags: ["Intel", "Cryptography", "Hardware", "Security"],
+                content: `
+# Analysis of Intel cryptographic backdoors
+
+This project explores potential backdoors in Intel's hardware cryptographic instructions, particularly AES-NI and RDRAND.
+
+## Context
+
+Following revelations about Intel-NSA collaboration, I wanted to understand how backdoors could be implemented at the hardware level without being detectable through static code analysis.
+
+## AES-NI instructions
+
+AES-NI instructions accelerate AES encryption. But how can we verify they correctly implement the algorithm?
+
+I compared AES-NI results with a reference software implementation over millions of test vectors. No divergence detected so far.
+
+## RDRAND and entropy
+
+The RDRAND instruction is supposed to generate secure random numbers. The problem: we can't audit the generator.
+
+I tested the output with various statistical tests (NIST, Diehard). Results pass all tests, but this doesn't prove the absence of a backdoor.
+
+## Microcode analysis
+
+Intel microcode isn't public. I extracted microcode via BIOS updates and attempted to disassemble it. The format is obfuscated and undocumented.
+
+## Conclusion
+
+Without access to the complete hardware design, it's impossible to prove the absence of backdoors. This project demonstrates the limits of security verification at the hardware level.
+`
+            },
+            {
+                id: 3,
+                title: "Building a minimal OS: AuriOS",
+                description: "Creating an operating system from scratch following OSDev. Bootloader, memory management, interrupts, and basic drivers.",
+                date: "2025-09-20",
+                tags: ["OS Dev", "C", "Assembly", "Kernel"],
+                content: `
+# Building a minimal OS: AuriOS
+
+AuriOS is a minimalist OS project developed from scratch to learn fundamental operating system concepts.
+
+## Architecture
+
+The OS is divided into several components:
+
+1. **Bootloader**: Assembly code that loads the kernel into memory
+2. **Kernel**: Written in C, handles memory and interrupts
+3. **Drivers**: VGA, keyboard, timer
+
+## Bootloader
+
+The bootloader is written in 16-bit assembly (real mode). It:
+
+- Enables the A20 line
+- Switches to 32-bit protected mode
+- Loads the kernel from disk
+- Transfers control to the kernel
+
+\`\`\`nasm
+bits 16
+org 0x7c00
+
+start:
+    cli
+    xor ax, ax
+    mov ds, ax
+    mov es, ax
+    mov ss, ax
+    mov sp, 0x7c00
+    
+    ; Load kernel from disk
+    mov bx, 0x1000
+    call load_kernel
+    
+    ; Switch to protected mode
+    lgdt [gdt_descriptor]
+    mov eax, cr0
+    or eax, 1
+    mov cr0, eax
+    
+    jmp 0x08:protected_mode
+\`\`\`
+
+## Memory management
+
+I implemented a simple allocator based on a bitmap. Each bit represents a 4KB page. Allocation is done in O(n) time by traversing the bitmap.
+
+## Interrupts
+
+The kernel configures the IDT (Interrupt Descriptor Table) to handle hardware and software interrupts. CPU exceptions (division by zero, page fault, etc.) are caught and display an error message.
+
+## Next steps
+
+- Scheduler implementation
+- Multitasking support
+- Basic file system
+- Interactive shell
+
+This project is extremely educational for understanding what happens under the hood of a modern OS.
+`
+            }
+        ];
+
+        const projects = [
+            {
+                title: "KittyDisassemblerC",
+                description: "A disassembler for 64-bit ELF files written in C. Parses sections, resolves symbols, and generates readable assembly.",
+                language: "C",
+                langColor: "#555555",
+                stars: 1,
+                forks: 1,
+                url: "https://github.com/llmaddie/KittyDisassemblerC"
+            },
+            {
+                title: "Intel Crypto Backdoor Research",
+                description: "Research on potential NSA backdoors in Intel cryptographic instructions (AES-NI, RDRAND).",
+                language: "C",
+                langColor: "#555555",
+                stars: 0,
+                forks: 0,
+                url: "https://github.com/llmaddie/potential-POC-intel-crypto"
+            },
+            {
+                title: "AuriOS",
+                description: "A minimal operating system developed from scratch. Bootloader, kernel, memory management, and basic drivers.",
+                language: "Makefile",
+                langColor: "#427819",
+                stars: 8,
+                forks: 2,
+                url: "https://github.com/llmaddie/Auri-OS"
+            }
+        ];
+
+        // View management
+        function showView(viewName) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+            
+            const viewMap = {
+                'articles': 'articles-view',
+                'projects': 'projects-view',
+                'about': 'about-view',
+                'create': 'create-view'
+            };
+            
+            document.getElementById(viewMap[viewName]).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Load articles
+        function loadArticles() {
+            const list = document.getElementById('article-list');
+            list.innerHTML = articles.map(article => `
+                <div class="article-item">
+                    <div class="item-meta">
+                        <span class="item-date">${formatDate(article.date)}</span>
+                    </div>
+                    <h2 class="item-title" onclick="showArticle(${article.id})">${article.title}</h2>
+                    <p class="item-description">${article.description}</p>
+                    <div class="tags">
+                        ${article.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Show article
+        function showArticle(id) {
+            const article = articles.find(a => a.id === id);
+            if (!article) return;
+
+            const content = document.getElementById('article-full');
+            content.innerHTML = `
+                <a href="#" class="back-button" onclick="event.preventDefault(); showView('articles')">← Back to articles</a>
+                <div class="article-header">
+                    <div class="item-meta">
+                        <span class="item-date">${formatDate(article.date)}</span>
+                    </div>
+                    <h1>${article.title}</h1>
+                    <div class="tags">
+                        ${article.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                    </div>
+                </div>
+                <div class="article-content">${parseMarkdown(article.content)}</div>
+            `;
+
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById('article-view').classList.add('active');
+        }
+
+        // Load projects
+        function loadProjects() {
+            const grid = document.getElementById('projects-grid');
+            grid.innerHTML = projects.map(project => `
+                <div class="project-card" onclick="window.open('${project.url}', '_blank')">
+                    <div class="project-header">
+                        <h3 class="project-title">${project.title}</h3>
+                    </div>
+                    <p class="project-description">${project.description}</p>
+                    <div class="project-stats">
+                        <span class="project-lang">
+                            <span class="lang-dot" style="background: ${project.langColor}"></span>
+                            ${project.language}
+                        </span>
+                        <span>★ ${project.stars}</span>
+                        <span>⑂ ${project.forks}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Format date
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        }
+
+        // Simple markdown parser
+        function parseMarkdown(md) {
+            return md
+                .replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
+                .replace(/`([^`]+)`/g, '<code>$1</code>')
+                .replace(/^# (.+)$/gm, '<h2>$1</h2>')
+                .replace(/^## (.+)$/gm, '<h3>$1</h3>')
+                .replace(/^\- (.+)$/gm, '<li>$1</li>')
+                .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
+                .replace(/\n\n/g, '</p><p>')
+                .replace(/^(?!<[hup])/gm, '<p>')
+                .replace(/(?![hup]>)$/gm, '</p>');
+        }
+
+        // Article form
+        document.getElementById('article-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const newArticle = {
+                id: articles.length + 1,
+                title: document.getElementById('article-title').value,
+                description: document.getElementById('article-description').value,
+                date: new Date().toISOString().split('T')[0],
+                tags: document.getElementById('article-tags').value.split(',').map(t => t.trim()),
+                content: document.getElementById('article-content').value
+            };
+
+            articles.unshift(newArticle);
+            loadArticles();
+            showView('articles');
+            e.target.reset();
+        });
+
+        // Initialize
+        loadArticles();
+        loadProjects();
+    </script>
+</body>
+</html>
